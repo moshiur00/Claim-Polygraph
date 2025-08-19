@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+    <h2>Analysis of Claims from News/Articles or YouTube Video</h2>
+
+    <form method="post" action="{{ url_for('index') }}">
+        <label for="user_input">Paste raw text, a YouTube URL, or an article URL</label>
+        <textarea id="user_input" name="user_input" rows="5"
+            placeholder="e.g. https://www.youtube.com/watch?v=... or https://example.com/news/...">{{ raw_input or "" }}</textarea>
+
+        <button type="submit">Run</button>
+    </form>
+    <!-- <p class="muted">We’ll show extracted text in a small toggle, and (if provided) render the fact-check JSON below. -->
+    </p>
+</section>
+
+{% if text %}
+<section class="card">
+    {% if warnings and warnings|length %}
+    <div class="note">
+        <strong>Notes:</strong>
+        <ul>
+            {% for w in warnings %}
+            <li>{{ w }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <details class="toggle">
+        <summary>Show extracted text</summary>
+        <div class="excerpt compact">
+            {{ text }}
+        </div>
+    </details>
+</section>
+{% endif %}
+
+{% if factcheck %}
+<section class="card">
+    <h2>LLM Based Claim Verfication</h2>
+
+    {% set orv = factcheck.get('overall_reliability', {}) %}
+    <div class="fc-summary">
+        <div class="fc-score">
+            <div class="pill pill-primary">Overall: {{ orv.get('band','') }}</div>
+            <div class="score">{{ orv.get('score', '') }}</div>
+        </div>
+        <p class="muted">{{ orv.get('summary','') }}</p>
+    </div>
+
+    <details class="toggle" style="margin-top:10px;">
+        <summary>Claims ({{ factcheck.get('claims', [])|length }})</summary>
+        <div class="fc-table-wrap">
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Sentence</th>
+                        <th>Verdict</th>
+                        <th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in factcheck.get('claims', []) %}
+                    <tr>
+                        <td>{{ c.get('rank') }}</td>
+                        <td class="sentence">{{ c.get('sentence') }}</td>
+                        <td>
+                            {% set v = (c.get('verdict') or '') %}
+                            <span
+                                class="pill {{ 'pill-true' if v|lower=='true' else ('pill-false' if v|lower=='false' else 'pill-mixed') }}">
+                                {{ v }}
+                            </span>
+                        </td>
+                        <td>
+                            {{ c.get('confidence', '') }}%
+                            <span class="mini muted">({{ c.get('confidence_band','') }})</span>
+                        </td>
+                    </tr>
+                    <tr class="fc-details-row">
+                        <td></td>
+                        <td colspan="3">
+                            <details class="toggle slim">
+                                <summary>Details</summary>
+                                <div class="fc-details">
+                                    <div><strong>Reasoning:</strong> {{ c.get('reasoning','') }}</div>
+                                    {% if c.get('sources') %}
+                                    <div class="sources">
+                                        <strong>Sources:</strong>
+                                        <ul>
+                                            {% for s in c.get('sources') %}
+                                            <li><a href="{{ s }}" target="_blank" rel="noopener">Source {{ loop.index
+                                                    }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </details>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+
+    <details class="toggle" style="margin-top:10px;">
+        <summary>Show raw JSON</summary>
+        <pre class="excerpt compact">{{ factcheck | tojson(indent=2) }}</pre>
+    </details>
+</section>
+{% endif %}
+
+{% include "fact_matches.html" %}
+
+{% endblock %}

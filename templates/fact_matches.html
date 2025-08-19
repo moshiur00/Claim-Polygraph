@@ -1,0 +1,90 @@
+{# templates/partials/fact_matches.html #}
+{% if claim_worthy or fact_checks %}
+<section class="card">
+    <h2>Claim Verification Using Tools</h2>
+
+    {# ---- A) ClaimBuster: Top claim‑worthy sentences ---- #}
+    {% if claim_worthy %}
+    <details class="toggle" style="margin-top:10px;">
+        <summary>Top claim‑worthy sentences (ClaimBuster)</summary>
+        <div class="fc-table-wrap" style="margin-top:8px;">
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th style="width:70%;">Sentence</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# claim_worthy is a list of (sentence, score_float_0_to_1) #}
+                    {% for item in claim_worthy %}
+                    {% set sent = item[0] %}
+                    {% set score = item[1] %}
+                    <tr>
+                        <td class="sentence">{{ sent }}</td>
+                        <td>
+                            {% set pct = (score * 100.0) | round(1) %}
+                            <span class="pill pill-primary">{{ pct }}%</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+    {% endif %}
+
+    {# ---- B) Google Fact Check Tools: Matches grouped by claim ---- #}
+    {% if fact_checks %}
+    {% for group in fact_checks|groupby('claim') %}
+    {% set claim = group.grouper %}
+    {% set reviews = group.list %}
+    <details class="toggle" style="margin-top:10px;">
+        <summary>{{ claim }} ({{ reviews|length }} review{{ 's' if reviews|length != 1 else '' }})</summary>
+
+        <div class="fc-table-wrap" style="margin-top:8px;">
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>Publisher</th>
+                        <th>Title</th>
+                        <th>Rating</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reviews %}
+                    <tr>
+                        <td>{{ r.publisher }}</td>
+                        <td class="sentence">
+                            {% if r.url %}
+                            <a href="{{ r.url }}" target="_blank" rel="noopener">{{ r.title or 'View article' }}</a>
+                            {% else %}
+                            {{ r.title or '—' }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set label = (r.rating or '')|lower %}
+                            {% set cls = 'pill-mixed' %}
+                            {% if 'false' in label or 'misleading' in label or 'incorrect' in label %}
+                            {% set cls = 'pill-false' %}
+                            {% elif 'true' in label or 'accurate' in label or 'supported' in label %}
+                            {% set cls = 'pill-true' %}
+                            {% endif %}
+                            <span class="pill {{ cls }}">{{ r.rating or '—' }}</span>
+                        </td>
+                        <td class="mini muted">{{ r.date or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+    {% endfor %}
+    {% else %}
+        <p class="muted" style="margin-top:10px;">
+            ⚠️ No fact-check reviews were found from Google Fact Check Tools API.
+        </p>
+    {% endif %}
+</section>
+{% endif %}
