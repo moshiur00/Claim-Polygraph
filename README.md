@@ -42,7 +42,7 @@ git clone https://github.com/yourusername/claim-polygraph.git
 cd claim-polygraph
 python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
-pip install -r [requirements.txt](http://_vscodecontentref_/0)
+pip install -r requirements.txt
 ```
 
 ## APIs Used
