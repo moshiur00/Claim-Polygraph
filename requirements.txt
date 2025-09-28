@@ -17,3 +17,5 @@ python-dotenv
 openai
 flask
 trafilatura
+
+gunicorn
