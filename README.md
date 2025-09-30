@@ -49,13 +49,9 @@ pip install -r requirements.txt
 - [ClaimBuster](https://idir.uta.edu/claimbuster/api/)
 - [Google Fact Check Tools](https://developers.google.com/fact-check/tools/api/reference/rest)
 
-# 🕵️‍♂️ Fact-Check Prompt System
-
-A robust, tool-ready **fact-checking prompt generator** that extracts claimworthy sentences from text, evaluates them with a standardized rubric, and provides both **per-claim verdicts** and an **overall reliability score**.
-
 ---
 
-## Confidence & Reliability Standardization of LLM Fact Checking
+# Confidence & Reliability Standardization of LLM Fact Checking
 
 To ensure consistent and transparent fact-checking, every claim and overall text assessment follows a standardized scoring rubric.
 
@@ -114,7 +110,7 @@ After computing, scores are **rounded to the nearest integer** and mapped to the
 
 ---
 
-## 📝 Overall Reliability Assessment
+## Overall Reliability Assessment
 
 In addition to per-claim verdicts, the system generates an **Overall Reliability Assessment** of the text:
 
