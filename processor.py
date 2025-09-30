@@ -2,7 +2,8 @@ import re
 from urllib.parse import urlparse
 import requests
 import trafilatura
-from information_extraction import youtube_transcriber
+# from information_extraction import youtube_transcriber
+from information_extraction import yt_transcript_fetcher
 
 # from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound, VideoUnavailable
 
@@ -82,12 +83,16 @@ def process_input(user_input: str) -> tuple[str, dict, list[str]]:
 
     if is_url(user_input):
         if is_youtube(user_input):
-            text = youtube_transcriber.transcribe_youtube(
-                user_input,
-                engine="faster-whisper",
-                model="tiny",
-                keep_temp=False,
-            )
+            # text = youtube_transcriber.transcribe_youtube(
+            #     user_input,
+            #     engine="faster-whisper",
+            #     model="tiny",
+            #     keep_temp=False,
+            # )
+            text = ""
+            vid = yt_transcript_fetcher.extract_video_id(user_input)
+            result = yt_transcript_fetcher.get_youtube_transcript_any(vid)
+            text = result["transcript"]
         else:
             text = fetch_text_from_article(user_input)
     else:
